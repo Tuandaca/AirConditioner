@@ -162,26 +162,27 @@ export function ProductDetailClient({ product, zaloUrl, phoneNumber }: ProductDe
               </CardContent>
             </Card>
 
-            {/* Sticky CTA Buttons */}
-            <div className="sticky bottom-6 space-y-3">
-              <a href={zaloUrl} target="_blank" rel="noopener noreferrer" className="block">
-                <Button
-                  size="lg"
-                  className="w-full bg-[#0068FF] hover:bg-[#0052CC] text-white h-14 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                >
-                  <MessageCircle className="h-5 w-5 mr-2" />
-                  Chat Zalo tư vấn
-                </Button>
+            {/* CTA Buttons */}
+            <div className="space-y-4 pt-6">
+              <a href={zaloUrl} target="_blank" rel="noopener noreferrer" className="block group">
+                <div className="relative w-full bg-gradient-to-r from-[#0068FF] to-[#0052CC] hover:from-[#0052CC] hover:to-[#0040A0] text-white font-semibold h-16 text-lg rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 flex items-center justify-between px-6 cursor-pointer overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="flex items-center z-10">
+                    <MessageCircle className="h-6 w-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
+                    <span>Chat Zalo tư vấn</span>
+                  </div>
+                  <span className="text-xl opacity-80 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300 z-10">→</span>
+                </div>
               </a>
-              <a href={phoneNumber} className="block">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full bg-green-600 hover:bg-green-700 text-white border-0 h-14 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                >
-                  <Phone className="h-5 w-5 mr-2" />
-                  Gọi ngay: 0912 345 678
-                </Button>
+              <a href={phoneNumber} className="block group">
+                <div className="relative w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold h-16 text-lg rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-0.5 flex items-center justify-between px-6 cursor-pointer overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="flex items-center z-10">
+                    <Phone className="h-6 w-6 mr-3 group-hover:scale-110 transition-transform duration-300" />
+                    <span>Gọi ngay: 0912 345 678</span>
+                  </div>
+                  <span className="text-xl opacity-80 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300 z-10">→</span>
+                </div>
               </a>
             </div>
           </motion.div>

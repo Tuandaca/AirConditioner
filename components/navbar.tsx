@@ -52,7 +52,7 @@ export function Navbar() {
               </Button>
             </a>
             <a href={PHONE_NUMBER}>
-              <Button size="sm" className="bg-green-600 hover:bg-green-700">
+              <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white hover:text-white">
                 <Phone className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Gọi ngay</span>
                 <span className="sm:hidden">Call</span>

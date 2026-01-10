@@ -104,7 +104,7 @@ export default function HomePage() {
               </Button>
             </a>
             <a href="tel:0912345678">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 h-auto px-8 py-6 text-lg">
+              <Button size="lg" variant="outline" className="border-white text-white !text-white hover:bg-white/10 hover:!text-white h-auto px-8 py-6 text-lg">
                 Gọi hotline: 0912 345 678
               </Button>
             </a>
