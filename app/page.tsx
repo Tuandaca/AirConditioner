@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { getSiteSettings } from '@/lib/settings'
 
+export const dynamic = 'force-dynamic'
+
 type Product = {
   id: string
   name: string
