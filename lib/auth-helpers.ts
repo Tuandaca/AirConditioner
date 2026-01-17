@@ -4,9 +4,9 @@ import { redirect } from 'next/navigation'
 
 export async function requireAuth() {
   const session = await getServerSession(authOptions)
-  
+
   if (!session) {
-    redirect('/admin/login')
+    redirect('/login')
   }
 
   return session

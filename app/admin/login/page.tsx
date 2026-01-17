@@ -25,11 +25,12 @@ export default function AdminLoginPage() {
         email,
         password,
         redirect: false,
+        callbackUrl: '/admin',
       })
 
       if (result?.error) {
         setError('Email hoặc mật khẩu không đúng')
-      } else {
+      } else if (result?.ok) {
         router.push('/admin')
         router.refresh()
       }
