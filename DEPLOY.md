@@ -1,232 +1,154 @@
-# 🚀 Hướng dẫn Deploy Website Lên Online
+# Deployment Guide
 
-## Phương án 1: Deploy lên Vercel (KHUYẾN NGHỊ - Miễn phí & Dễ nhất)
+## Pre-Deployment Checklist
 
-Vercel là platform được tối ưu đặc biệt cho Next.js, hoàn toàn miễn phí và rất dễ sử dụng.
+- [ ] Update `.env` with production values
+- [ ] Set strong `NEXTAUTH_SECRET` (use `openssl rand -base64 32`)
+- [ ] Change default admin credentials
+- [ ] Set up production database (PostgreSQL)
+- [ ] Configure image storage (Cloudinary, AWS S3, or Vercel Blob)
+- [ ] Update `NEXTAUTH_URL` to production domain
 
-### Bước 1: Chuẩn bị GitHub Repository
+## Vercel Deployment
 
-1. **Tạo repository mới trên GitHub:**
-   - Vào [github.com](https://github.com) và đăng nhập
-   - Click "New repository"
-   - Đặt tên: `air-conditioner-shop` (hoặc tên khác)
-   - Chọn Public hoặc Private
-   - **KHÔNG** tích "Initialize with README" (vì đã có code rồi)
-   - Click "Create repository"
-
-2. **Push code lên GitHub:**
-
+### Step 1: Prepare Repository
 ```bash
-# Khởi tạo git (nếu chưa có)
-git init
-
-# Thêm tất cả files
 git add .
-
-# Commit code
-git commit -m "Initial commit: Air Conditioner E-commerce Website"
-
-# Thêm remote repository (thay YOUR_USERNAME và YOUR_REPO_NAME)
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-
-# Push code lên GitHub
-git branch -M main
-git push -u origin main
+git commit -m "Initial commit"
+git push origin main
 ```
 
-### Bước 2: Deploy lên Vercel
+### Step 2: Deploy to Vercel
 
-1. **Đăng ký tài khoản Vercel:**
-   - Vào [vercel.com](https://vercel.com)
-   - Click "Sign Up" và đăng nhập bằng GitHub account
+1. Go to [vercel.com](https://vercel.com)
+2. Import your GitHub repository
+3. Configure environment variables:
+   - `DATABASE_URL` - Your PostgreSQL connection string
+   - `NEXTAUTH_URL` - Your production URL (e.g., `https://yourdomain.com`)
+   - `NEXTAUTH_SECRET` - Generate with: `openssl rand -base64 32`
 
-2. **Import Project:**
-   - Trong Vercel dashboard, click "Add New..." → "Project"
-   - Chọn repository vừa push lên GitHub
-   - Click "Import"
+### Step 3: Set Up Database
 
-3. **Cấu hình Project:**
-   - **Framework Preset**: Next.js (tự động detect)
-   - **Root Directory**: `./` (mặc định)
-   - **Build Command**: `npm run build` (mặc định)
-   - **Output Directory**: `.next` (mặc định)
-   - **Install Command**: `npm install` (mặc định)
+**Option A: Vercel Postgres**
+1. In Vercel dashboard, go to Storage
+2. Create a Postgres database
+3. Copy the connection string to `DATABASE_URL`
 
-4. **Deploy:**
-   - Click "Deploy"
-   - Đợi 1-2 phút để build và deploy
-   - Xong! Website sẽ có URL dạng: `https://your-project-name.vercel.app`
+**Option B: External Database (Supabase, Neon, etc.)**
+1. Create database in your provider
+2. Copy connection string to `DATABASE_URL`
 
-### Bước 3: Cập nhật Domain (Tùy chọn)
+### Step 4: Run Migrations
 
-1. Trong Vercel dashboard → Project Settings → Domains
-2. Thêm domain của bạn (ví dụ: `maylanh.com`)
-3. Cấu hình DNS theo hướng dẫn của Vercel
-
----
-
-## Phương án 2: Deploy lên Netlify (Miễn phí)
-
-### Bước 1: Build Project
-
+After deployment, run:
 ```bash
-npm run build
-npm run export  # Nếu cần static export
+# Via Vercel CLI
+vercel env pull
+npx prisma db push
+npm run db:seed
 ```
 
-### Bước 2: Deploy
+Or use Vercel's deployment hooks to run migrations automatically.
 
-1. Vào [netlify.com](https://netlify.com)
-2. Drag & drop thư mục `.next` vào Netlify
-3. Hoặc kết nối GitHub repository tương tự Vercel
+## Environment Variables
 
----
-
-## Phương án 3: Deploy lên Server riêng (VPS/Cloud)
-
-### Yêu cầu:
-- Node.js 18+ installed
-- PM2 hoặc process manager khác
-
-### Các bước:
-
-1. **Clone code lên server:**
-```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-cd air-conditioner-shop
-```
-
-2. **Cài đặt dependencies:**
-```bash
-npm install --production
-```
-
-3. **Build project:**
-```bash
-npm run build
-```
-
-4. **Chạy production server:**
-```bash
-npm start
-```
-
-5. **Dùng PM2 để chạy background (khuyến nghị):**
-```bash
-npm install -g pm2
-pm2 start npm --name "air-conditioner-shop" -- start
-pm2 save
-pm2 startup
-```
-
-6. **Cấu hình Nginx (reverse proxy):**
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-
----
-
-## 📋 Checklist Trước Khi Deploy
-
-- [ ] Build thành công (`npm run build`)
-- [ ] Kiểm tra không có lỗi linting (`npm run lint`)
-- [ ] Cập nhật thông tin liên hệ (Zalo, Phone, Email) trong code
-- [ ] Thay placeholder images bằng ảnh thật
-- [ ] Cập nhật product data với dữ liệu thật
-- [ ] Kiểm tra responsive trên mobile
-- [ ] Test tất cả các trang (Homepage, Products, Product Detail)
-
----
-
-## 🔧 Environment Variables (Nếu cần)
-
-Nếu muốn dùng environment variables, tạo file `.env.local`:
-
+### Required
 ```env
-NEXT_PUBLIC_ZALO_URL=https://zalo.me/your-zalo-id
-NEXT_PUBLIC_PHONE_NUMBER=tel:your-phone-number
-NEXT_PUBLIC_FACEBOOK_URL=https://m.me/your-facebook-page
+DATABASE_URL=postgresql://...
+NEXTAUTH_URL=https://yourdomain.com
+NEXTAUTH_SECRET=your-secret-here
 ```
 
-Sau đó update code để dùng:
-```typescript
-const ZALO_URL = process.env.NEXT_PUBLIC_ZALO_URL || 'https://zalo.me/0912345678'
+### Optional
+```env
+ADMIN_EMAIL=admin@yourdomain.com
+ADMIN_PASSWORD=your-secure-password
 ```
 
-Trong Vercel: Project Settings → Environment Variables → Thêm các biến
+## Post-Deployment
 
----
+1. **Seed Database**
+   - Access Vercel deployment
+   - Run: `npm run db:seed`
 
-## 🎯 Deploy Nhanh Nhất (Vercel CLI)
+2. **Verify Admin Access**
+   - Visit `/admin/login`
+   - Login with seeded credentials
+   - Change password immediately
 
-1. **Cài đặt Vercel CLI:**
-```bash
-npm install -g vercel
-```
+3. **Configure Settings**
+   - Go to `/admin/settings`
+   - Update hotline, Zalo, Facebook links
 
-2. **Login:**
-```bash
-vercel login
-```
+4. **Add Products**
+   - Go to `/admin/products/new`
+   - Add your products
 
-3. **Deploy:**
-```bash
-vercel
-```
+## Image Storage
 
-4. **Deploy production:**
-```bash
-vercel --prod
-```
+Currently, the app uses image URLs. For production, consider:
 
----
+1. **Vercel Blob Storage**
+   ```bash
+   npm install @vercel/blob
+   ```
 
-## ⚡ Performance Tips
+2. **Cloudinary**
+   ```bash
+   npm install cloudinary
+   ```
 
-1. **Enable Image Optimization:** Đã có sẵn với Next.js Image component
-2. **Enable Compression:** Vercel tự động enable
-3. **CDN:** Vercel tự động dùng CDN global
-4. **Analytics:** Có thể thêm Vercel Analytics (miễn phí)
+3. **AWS S3**
+   ```bash
+   npm install @aws-sdk/client-s3
+   ```
 
----
+Update the media management page to support file uploads.
 
-## 🆘 Troubleshooting
+## Security Recommendations
 
-### Lỗi build trên Vercel:
-- Kiểm tra Node.js version (cần 18+)
-- Kiểm tra `package.json` có đúng dependencies
-- Xem build logs trong Vercel dashboard
+1. **Rate Limiting**
+   - Add rate limiting to API routes
+   - Use Vercel's built-in rate limiting or Upstash
 
-### Website không load:
-- Kiểm tra domain DNS settings
-- Kiểm tra Vercel deployment status
-- Xem logs trong Vercel dashboard
+2. **CSRF Protection**
+   - NextAuth includes CSRF protection
+   - Ensure `NEXTAUTH_SECRET` is secure
 
-### Environment variables không hoạt động:
-- Đảm bảo prefix với `NEXT_PUBLIC_` cho client-side variables
-- Redeploy sau khi thay đổi env variables
+3. **Password Security**
+   - Use strong passwords
+   - Consider 2FA for admin accounts
 
----
+4. **API Security**
+   - All admin routes are protected by middleware
+   - Verify authentication on all admin API routes
 
-## 📞 Hỗ trợ
+## Monitoring
 
-Nếu gặp vấn đề, kiểm tra:
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Vercel Documentation](https://vercel.com/docs)
-- [Vercel Community](https://github.com/vercel/next.js/discussions)
+- Set up Vercel Analytics
+- Monitor database connections
+- Set up error tracking (Sentry, etc.)
+- Monitor API response times
 
----
+## Backup
 
-**🎉 Chúc mừng! Website của bạn đã online!**
+- Regular database backups
+- Export product data periodically
+- Keep environment variables secure
+
+## Troubleshooting
+
+### Database Connection Issues
+- Verify `DATABASE_URL` is correct
+- Check database allows connections from Vercel IPs
+- Ensure SSL is enabled if required
+
+### Authentication Issues
+- Verify `NEXTAUTH_SECRET` is set
+- Check `NEXTAUTH_URL` matches your domain
+- Clear cookies and try again
+
+### Build Errors
+- Check Prisma Client is generated
+- Verify all environment variables are set
+- Check build logs in Vercel dashboard

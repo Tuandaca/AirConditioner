@@ -1,246 +1,221 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { ProductCard } from '@/components/product-card'
-import { products, brands, horsepowerOptions } from '@/data/products'
-import { Brand, Horsepower } from '@/types/product'
+import { useEffect, useState } from 'react'
+import { ProductGrid } from '@/components/product-grid'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { X, Filter } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Search } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+
+interface Product {
+  id: string
+  name: string
+  slug: string
+  price: number
+  originalPrice?: number
+  brand: string
+  horsepower: string
+  inverter: boolean
+  images: string[]
+  status: string
+}
 
 export default function ProductsPage() {
-  const [selectedBrands, setSelectedBrands] = useState<Brand[]>([])
-  const [selectedHorsepower, setSelectedHorsepower] = useState<Horsepower[]>([])
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000000])
-  const [inverterOnly, setInverterOnly] = useState<boolean | undefined>(undefined)
-  const [showFilters, setShowFilters] = useState(false)
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [brands, setBrands] = useState<string[]>([])
+  const [horsepowers, setHorsepowers] = useState<string[]>([])
 
-  const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      if (selectedBrands.length > 0 && !selectedBrands.includes(product.brand)) {
-        return false
+  const [filters, setFilters] = useState({
+    search: searchParams.get('search') || '',
+    brand: searchParams.get('brand') || 'all',
+    horsepower: searchParams.get('horsepower') || 'all',
+    inverter: searchParams.get('inverter') || 'all',
+  })
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true)
+      try {
+        const params = new URLSearchParams()
+        if (filters.search) params.set('search', filters.search)
+        if (filters.brand && filters.brand !== 'all') params.set('brand', filters.brand)
+        if (filters.horsepower && filters.horsepower !== 'all') params.set('horsepower', filters.horsepower)
+        if (filters.inverter && filters.inverter !== 'all') params.set('inverter', filters.inverter)
+
+        const response = await fetch(`/api/products?${params.toString()}`)
+        const data = await response.json()
+        setProducts(data)
+      } catch (error) {
+        console.error('Error fetching products:', error)
+      } finally {
+        setLoading(false)
       }
-      if (selectedHorsepower.length > 0 && !selectedHorsepower.includes(product.horsepower)) {
-        return false
-      }
-      if (product.price < priceRange[0] || product.price > priceRange[1]) {
-        return false
-      }
-      if (inverterOnly !== undefined && product.inverter !== inverterOnly) {
-        return false
-      }
-      return true
+    }
+
+    fetchProducts()
+  }, [filters])
+
+  // Fetch filter options 
+  useEffect(() => {
+    fetch('/api/products/filters')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.brands) setBrands(data.brands)
+        if (data.horsepowers) setHorsepowers(data.horsepowers)
+      })
+      .catch((error) => console.error('Error fetching filters:', error))
+  }, [])
+
+  // Sync state with URL params
+  useEffect(() => {
+    setFilters({
+      search: searchParams.get('search') || '',
+      brand: searchParams.get('brand') || 'all',
+      horsepower: searchParams.get('horsepower') || 'all',
+      inverter: searchParams.get('inverter') || 'all',
     })
-  }, [selectedBrands, selectedHorsepower, priceRange, inverterOnly])
+  }, [searchParams])
 
-  const toggleBrand = (brand: Brand) => {
-    setSelectedBrands((prev) =>
-      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
-    )
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value }))
+    const params = new URLSearchParams(searchParams.toString())
+    if (value && value !== 'all') {
+      params.set(key, value)
+    } else {
+      params.delete(key)
+    }
+    router.push(`/products?${params.toString()}`)
   }
 
-  const toggleHorsepower = (hp: Horsepower) => {
-    setSelectedHorsepower((prev) =>
-      prev.includes(hp) ? prev.filter((h) => h !== hp) : [...prev, hp]
-    )
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const params = new URLSearchParams()
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value !== 'all') params.set(key, value)
+    })
+    router.push(`/products?${params.toString()}`)
   }
-
-  const clearFilters = () => {
-    setSelectedBrands([])
-    setSelectedHorsepower([])
-    setPriceRange([0, 50000000])
-    setInverterOnly(undefined)
-  }
-
-  const activeFiltersCount =
-    selectedBrands.length + selectedHorsepower.length + (inverterOnly !== undefined ? 1 : 0)
 
   return (
-    <div className="min-h-screen pt-24 pb-12 bg-gray-50">
-      <div className="container px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
-            Tất cả sản phẩm
-          </h1>
-          <p className="text-lg text-gray-600 mb-8">
-            {filteredProducts.length} sản phẩm
-          </p>
-        </motion.div>
+    <div className="container py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl md:text-4xl font-bold mb-4">Tất cả sản phẩm</h1>
+        <p className="text-muted-foreground">
+          Tìm kiếm điều hòa phù hợp với nhu cầu của bạn
+        </p>
+      </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Filters Sidebar */}
-          <aside
-            className={`lg:w-64 space-y-6 ${
-              showFilters ? 'block' : 'hidden lg:block'
-            }`}
-          >
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-              className="bg-white rounded-lg p-6 shadow-sm sticky top-24"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold flex items-center gap-2">
-                  <Filter className="h-5 w-5" />
-                  Bộ lọc
-                </h2>
-                {activeFiltersCount > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearFilters}
-                    className="text-xs"
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    Xóa
-                  </Button>
-                )}
-              </div>
+      <div className="grid lg:grid-cols-4 gap-4 lg:gap-8">
+        <aside className="lg:col-span-1">
+          <div className="bg-card border rounded-lg p-4 md:p-6 sticky top-20 lg:top-24">
+            <h2 className="font-semibold text-lg mb-4">Bộ lọc</h2>
 
-              {/* Brand Filter */}
-              <div className="mb-6">
-                <h3 className="font-semibold mb-3 text-gray-900">Hãng</h3>
-                <div className="space-y-2">
-                  {brands.map((brand) => (
-                    <label
-                      key={brand.value}
-                      className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedBrands.includes(brand.value as Brand)}
-                        onChange={() => toggleBrand(brand.value as Brand)}
-                        className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
-                      />
-                      <span>{brand.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Horsepower Filter */}
-              <div className="mb-6">
-                <h3 className="font-semibold mb-3 text-gray-900">Công suất</h3>
-                <div className="space-y-2">
-                  {horsepowerOptions.map((hp) => (
-                    <label
-                      key={hp.value}
-                      className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedHorsepower.includes(hp.value as Horsepower)}
-                        onChange={() => toggleHorsepower(hp.value as Horsepower)}
-                        className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
-                      />
-                      <span>{hp.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price Range */}
-              <div className="mb-6">
-                <h3 className="font-semibold mb-3 text-gray-900">Giá</h3>
-                <div className="space-y-2">
-                  <input
-                    type="range"
-                    min="0"
-                    max="50000000"
-                    step="1000000"
-                    value={priceRange[1]}
-                    onChange={(e) =>
-                      setPriceRange([priceRange[0], Number(e.target.value)])
-                    }
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Dưới {(priceRange[1] / 1000000).toFixed(0)} triệu</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Inverter Filter */}
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <h3 className="font-semibold mb-3 text-gray-900">Loại</h3>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
-                    <input
-                      type="radio"
-                      name="inverter"
-                      checked={inverterOnly === undefined}
-                      onChange={() => setInverterOnly(undefined)}
-                      className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
-                    />
-                    <span>Tất cả</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
-                    <input
-                      type="radio"
-                      name="inverter"
-                      checked={inverterOnly === true}
-                      onChange={() => setInverterOnly(true)}
-                      className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
-                    />
-                    <span>Inverter</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors">
-                    <input
-                      type="radio"
-                      name="inverter"
-                      checked={inverterOnly === false}
-                      onChange={() => setInverterOnly(false)}
-                      className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
-                    />
-                    <span>Thường</span>
-                  </label>
+                <label className="text-sm font-medium mb-2 block">Tìm kiếm</label>
+                <div className="relative">
+                  <Input
+                    value={filters.search}
+                    onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
+                    placeholder="Tên sản phẩm..."
+                    className="pl-10"
+                  />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
               </div>
-            </motion.div>
-          </aside>
 
-          {/* Products Grid */}
-          <div className="flex-1">
-            {/* Mobile Filter Toggle */}
-            <div className="lg:hidden mb-4">
-              <Button
-                onClick={() => setShowFilters(!showFilters)}
-                variant="outline"
-                className="w-full"
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                Bộ lọc
-                {activeFiltersCount > 0 && (
-                  <Badge className="ml-2 bg-primary">
-                    {activeFiltersCount}
-                  </Badge>
-                )}
-              </Button>
-            </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Thương hiệu</label>
+                <Select
+                  value={filters.brand}
+                  onValueChange={(value) => handleFilterChange('brand', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tất cả" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tất cả</SelectItem>
+                    {brands.map((brand) => (
+                      <SelectItem key={brand} value={brand}>
+                        {brand}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            {filteredProducts.length === 0 ? (
-              <div className="bg-white rounded-lg p-12 text-center">
-                <p className="text-lg text-gray-600 mb-4">
-                  Không tìm thấy sản phẩm phù hợp
-                </p>
-                <Button onClick={clearFilters} variant="outline">
-                  Xóa bộ lọc
-                </Button>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Công suất</label>
+                <Select
+                  value={filters.horsepower}
+                  onValueChange={(value) => handleFilterChange('horsepower', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tất cả" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tất cả</SelectItem>
+                    {horsepowers.map((hp) => (
+                      <SelectItem key={hp} value={hp}>
+                        {hp}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProducts.map((product, index) => (
-                  <ProductCard key={product.id} product={product} index={index} />
-                ))}
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">Loại</label>
+                <Select
+                  value={filters.inverter}
+                  onValueChange={(value) => handleFilterChange('inverter', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Tất cả" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tất cả</SelectItem>
+                    <SelectItem value="true">Inverter</SelectItem>
+                    <SelectItem value="false">Không Inverter</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            )}
+
+              <Button type="submit" className="w-full">Áp dụng bộ lọc</Button>
+            </form>
           </div>
+        </aside>
+
+        <div className="lg:col-span-3">
+          <div className="mb-6">
+            <p className="text-muted-foreground">
+              {loading ? 'Đang tải...' : `Tìm thấy ${products.length} sản phẩm`}
+            </p>
+          </div>
+
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Đang tải sản phẩm...</p>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground text-lg">
+                Không tìm thấy sản phẩm nào
+              </p>
+            </div>
+          ) : (
+            <ProductGrid products={products} />
+          )}
         </div>
       </div>
     </div>

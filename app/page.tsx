@@ -1,116 +1,111 @@
-import type { Metadata } from 'next'
 import { Hero } from '@/components/hero'
-import { BenefitsSection } from '@/components/benefits-section'
 import { ProductCard } from '@/components/product-card'
-import { products } from '@/data/products'
+import { prisma } from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { getSiteSettings } from '@/lib/settings'
 
-export const metadata: Metadata = {
-  title: 'Máy lạnh chính hãng - Lắp đặt tận nơi - Bảo hành dài hạn',
-  description: 'Chuyên cung cấp máy lạnh chính hãng Daikin, Panasonic, LG, Samsung. Lắp đặt tận nơi, bảo hành 12 tháng.',
+type Product = {
+  id: string
+  name: string
+  slug: string
+  price: number
+  originalPrice: number | null
+  brand: string
+  horsepower: string
+  inverter: boolean
+  images: string[]
+  status: string
 }
 
-export default function HomePage() {
-  const featuredProducts = products.filter(p => p.featured).slice(0, 6)
-  const quickCategories = [
-    { href: '/products?horsepower=1HP', label: 'Máy lạnh 1HP', description: 'Phù hợp phòng 12-15m²' },
-    { href: '/products?horsepower=1.5HP', label: 'Máy lạnh 1.5HP', description: 'Phù hợp phòng 15-20m²' },
-    { href: '/products?horsepower=2HP', label: 'Máy lạnh 2HP', description: 'Phù hợp phòng 20-25m²' },
-  ]
+export default async function HomePage() {
+  const [featuredProducts, settings] = await Promise.all([
+    prisma.product.findMany({
+      where: {
+        featured: true,
+        status: 'active',
+      },
+      take: 6,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    }),
+    getSiteSettings(),
+  ])
 
   return (
-    <main className="min-h-screen">
+    <>
       <Hero />
 
-      {/* Quick Categories */}
-      <section className="py-16 bg-white">
-        <div className="container px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-gray-900">
-            Chọn theo công suất
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {quickCategories.map((category) => (
-              <Link key={category.href} href={category.href}>
-                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
-                  <h3 className="text-xl font-semibold mb-2 text-gray-900 group-hover:text-primary transition-colors">
-                    {category.label}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    {category.description}
-                  </p>
-                  <Button variant="outline" size="sm" className="group/btn">
-                    Xem ngay
-                    <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-                  </Button>
-                </div>
-              </Link>
+      <section className="py-12 sm:py-16 bg-background">
+        <div className="container px-4 md:px-6">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 md:mb-4">
+              Sản Phẩm Nổi Bật
+            </h2>
+            <p className="text-muted-foreground text-base sm:text-lg">
+              Những sản phẩm được yêu thích nhất
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
+            {featuredProducts.map((product: Product) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                slug={product.slug}
+                price={product.price}
+                originalPrice={product.originalPrice || undefined}
+                brand={product.brand}
+                horsepower={product.horsepower}
+                inverter={product.inverter}
+                images={product.images}
+                phoneNumber={settings.phoneNumber}
+              />
             ))}
+          </div>
+
+          <div className="text-center">
+            <Button asChild size="lg">
+              <Link href="/products">Xem tất cả sản phẩm</Link>
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section id="products" className="py-20 bg-gray-50">
-        <div className="container px-4">
-          <div className="flex items-center justify-between mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
-                Sản phẩm nổi bật
-              </h2>
-              <p className="text-lg text-gray-600">
-                Máy lạnh chính hãng, giá tốt nhất thị trường
-              </p>
+      <section className="py-12 sm:py-16 bg-muted/50">
+        <div className="container px-4 md:px-6">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 md:mb-6">
+              Tại sao chọn chúng tôi?
+            </h2>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mt-8 md:mt-12">
+              <div>
+                <div className="text-4xl mb-4">🏆</div>
+                <h3 className="font-semibold text-lg mb-2">Chính hãng 100%</h3>
+                <p className="text-muted-foreground">
+                  Cam kết sản phẩm chính hãng, có đầy đủ giấy tờ bảo hành
+                </p>
+              </div>
+              <div>
+                <div className="text-4xl mb-4">💰</div>
+                <h3 className="font-semibold text-lg mb-2">Giá tốt nhất</h3>
+                <p className="text-muted-foreground">
+                  Giá cạnh tranh nhất thị trường, nhiều ưu đãi hấp dẫn
+                </p>
+              </div>
+              <div>
+                <div className="text-4xl mb-4">🚚</div>
+                <h3 className="font-semibold text-lg mb-2">Giao hàng nhanh</h3>
+                <p className="text-muted-foreground">
+                  Miễn phí vận chuyển và lắp đặt trong nội thành
+                </p>
+              </div>
             </div>
-            <Link href="/products">
-              <Button variant="outline" className="hidden md:flex">
-                Xem tất cả
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredProducts.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} />
-            ))}
-          </div>
-          <div className="text-center mt-8 md:hidden">
-            <Link href="/products">
-              <Button variant="outline" size="lg">
-                Xem tất cả sản phẩm
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
           </div>
         </div>
       </section>
-
-      <BenefitsSection />
-
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 to-cyan-600 text-white">
-        <div className="container px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Cần tư vấn chọn máy lạnh phù hợp?
-          </h2>
-          <p className="text-xl mb-8 text-blue-100 max-w-2xl mx-auto">
-            Đội ngũ tư vấn chuyên nghiệp sẵn sàng hỗ trợ bạn chọn máy lạnh phù hợp nhất với nhu cầu và ngân sách.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="https://zalo.me/0912345678" target="_blank" rel="noopener noreferrer">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 h-auto px-8 py-6 text-lg">
-                Chat Zalo ngay
-              </Button>
-            </a>
-            <a href="tel:0912345678">
-              <Button size="lg" variant="outline" className="border-white text-white !text-white hover:bg-white/10 hover:!text-white h-auto px-8 py-6 text-lg">
-                Gọi hotline: 0912 345 678
-              </Button>
-            </a>
-          </div>
-        </div>
-      </section>
-    </main>
+    </>
   )
 }

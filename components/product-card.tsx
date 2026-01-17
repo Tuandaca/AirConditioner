@@ -1,88 +1,99 @@
-'use client'
-
-import Image from 'next/image'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Product } from '@/types/product'
+import { Button } from '@/components/ui/button'
 import { formatPrice } from '@/lib/utils'
-import { ChevronRight } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Phone } from 'lucide-react'
+import { CONTACT_INFO } from '@/lib/constants'
 
 interface ProductCardProps {
-  product: Product
-  index?: number
+  id: string
+  name: string
+  slug: string
+  price: number
+  originalPrice?: number
+  brand: string
+  horsepower: string
+  inverter: boolean
+  images: string[]
+  phoneNumber?: string // Optional phone number passed from parent
 }
 
-export function ProductCard({ product, index = 0 }: ProductCardProps) {
+export function ProductCard({
+  id,
+  name,
+  slug,
+  price,
+  originalPrice,
+  brand,
+  horsepower,
+  inverter,
+  images,
+  phoneNumber = CONTACT_INFO.phone, // Default fallback
+}: ProductCardProps) {
+  const displayPhone = phoneNumber
+
+  const discount = originalPrice
+    ? Math.round(((originalPrice - price) / originalPrice) * 100)
+    : 0
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-    >
-      <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 h-full flex flex-col">
-        <Link href={`/products/${product.id}`}>
-          <div className="relative h-64 overflow-hidden bg-gray-100">
+    <Card className="group hover:shadow-lg transition-shadow h-full flex flex-col">
+      <Link href={`/products/${slug}`}>
+        <CardHeader className="p-0 relative">
+          <div className="relative aspect-square overflow-hidden rounded-t-lg">
             <Image
-              src={product.images[0]}
-              alt={product.name}
+              src={images[0] || '/placeholder.jpg'}
+              alt={name}
               fill
-              className="object-cover group-hover:scale-110 transition-transform duration-500"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              loading="lazy"
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
-            {product.originalPrice && (
+            {discount > 0 && (
               <Badge className="absolute top-2 right-2 bg-red-500">
-                -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                -{discount}%
               </Badge>
             )}
-            {product.inverter && (
+            {inverter && (
               <Badge variant="secondary" className="absolute top-2 left-2">
                 Inverter
               </Badge>
             )}
           </div>
-        </Link>
-        <CardHeader>
-          <div className="flex items-center justify-between mb-2">
-            <Badge variant="outline" className="text-xs">
-              {product.brand.toUpperCase()}
-            </Badge>
-            <Badge variant="secondary" className="text-xs">
-              {product.horsepower}
-            </Badge>
-          </div>
-          <h3 className="font-semibold text-lg line-clamp-2 min-h-[3.5rem] group-hover:text-primary transition-colors">
-            {product.name}
-          </h3>
         </CardHeader>
-        <CardContent className="flex-1">
-          <div className="space-y-2">
-            {product.originalPrice && (
-              <p className="text-sm text-muted-foreground line-through">
-                {formatPrice(product.originalPrice)}
-              </p>
-            )}
-            <p className="text-2xl font-bold text-primary">
-              {formatPrice(product.price)}
-            </p>
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {product.description}
-            </p>
-          </div>
-        </CardContent>
-        <CardFooter className="pt-4">
-          <Link href={`/products/${product.id}`} className="w-full">
-            <Button className="w-full group/btn" size="lg">
-              Xem chi tiết
-              <ChevronRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-            </Button>
-          </Link>
-        </CardFooter>
-      </Card>
-    </motion.div>
+      </Link>
+      <CardContent className="p-4 flex-1">
+        <Link href={`/products/${slug}`}>
+          <h3 className="font-semibold text-base sm:text-lg mb-2 hover:text-primary transition-colors line-clamp-2 min-h-[3rem]">
+            {name}
+          </h3>
+        </Link>
+        <div className="flex flex-wrap items-center gap-2 mb-2">
+          <Badge variant="outline" className="text-xs">{brand}</Badge>
+          <Badge variant="outline" className="text-xs">{horsepower}</Badge>
+        </div>
+        <div className="flex flex-wrap items-baseline gap-2 mb-4">
+          <span className="text-xl sm:text-2xl font-bold text-primary">
+            {formatPrice(price)}
+          </span>
+          {originalPrice && (
+            <span className="text-sm text-muted-foreground line-through">
+              {formatPrice(originalPrice)}
+            </span>
+          )}
+        </div>
+      </CardContent>
+      <CardFooter className="p-4 pt-0 flex gap-2">
+        <Button asChild className="flex-1 text-sm" size="sm">
+          <Link href={`/products/${slug}`}>Xem chi tiết</Link>
+        </Button>
+        <Button asChild variant="outline" size="sm" className="px-3">
+          <a href={`tel:${displayPhone}`} aria-label="Gọi điện">
+            <Phone className="h-4 w-4" />
+          </a>
+        </Button>
+      </CardFooter>
+    </Card>
   )
 }

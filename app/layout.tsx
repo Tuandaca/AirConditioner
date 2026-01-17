@@ -1,23 +1,15 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { FloatingChat } from '@/components/floating-chat'
-import { Footer } from '@/components/footer'
 import { Navbar } from '@/components/navbar'
+import { Footer } from '@/components/footer'
+import { FloatingChat } from '@/components/floating-chat'
 
-const inter = Inter({ subsets: ['latin', 'vietnamese'], variable: '--font-inter' })
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Máy lạnh chính hãng - Lắp đặt tận nơi - Bảo hành dài hạn',
-  description: 'Chuyên cung cấp máy lạnh chính hãng Daikin, Panasonic, LG, Samsung. Lắp đặt tận nơi, bảo hành 12 tháng. Giao hàng nhanh, giá tốt nhất thị trường.',
-  keywords: 'máy lạnh, điều hòa, daikin, panasonic, lg, samsung, máy lạnh inverter, lắp đặt máy lạnh',
-  authors: [{ name: 'Máy lạnh Việt Nam' }],
-  openGraph: {
-    title: 'Máy lạnh chính hãng - Lắp đặt tận nơi',
-    description: 'Chuyên cung cấp máy lạnh chính hãng, lắp đặt tận nơi, bảo hành dài hạn',
-    type: 'website',
-    locale: 'vi_VN',
-  },
+  title: 'Điều Hòa Chính Hãng - Giá Tốt Nhất',
+  description: 'Mua điều hòa chính hãng với giá tốt nhất. Daikin, Mitsubishi, Panasonic và nhiều thương hiệu khác.',
 }
 
 export default function RootLayout({
@@ -26,12 +18,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="vi" className={inter.variable}>
-      <body className="antialiased">
+    <html lang="vi">
+      <body className={inter.className}>
         <Navbar />
-        {children}
-        <FloatingChat />
+        <main className="min-h-screen">{children}</main>
         <Footer />
+        <FloatingChat />
       </body>
     </html>
   )

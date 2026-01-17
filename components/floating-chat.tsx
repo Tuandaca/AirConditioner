@@ -1,76 +1,107 @@
 'use client'
 
-import { MessageCircle, Phone } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { MessageCircle, X, Phone } from 'lucide-react'
+import { getZaloChatUrl } from '@/lib/settings'
 
-const ZALO_URL = 'https://zalo.me/0912345678' // Replace with your Zalo ID
-const FACEBOOK_URL = 'https://m.me/yourpage' // Replace with your Facebook page
-const PHONE_NUMBER = 'tel:0912345678' // Replace with your phone number
+interface SiteSettings {
+  phoneNumber: string
+  zaloNumber: string
+  facebookUrl: string
+}
 
 export function FloatingChat() {
+  const [isOpen, setIsOpen] = useState(false)
+  const [settings, setSettings] = useState<SiteSettings | null>(null)
+
+  useEffect(() => {
+    // Fetch settings from API
+    fetch('/api/settings')
+      .then((res) => res.json())
+      .then((data) => setSettings(data))
+      .catch((error) => {
+        console.error('Error fetching settings:', error)
+        // Fallback values
+        setSettings({
+          phoneNumber: '0917940833',
+          zaloNumber: '0917940833',
+          facebookUrl: 'https://www.facebook.com/ngobongsu',
+        })
+      })
+  }, [])
+
+  if (!settings) {
+    return null // Don't render until settings are loaded
+  }
+
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
-      {/* Zalo Button */}
-      <motion.div
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-      >
-        <a
-          href={ZALO_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group"
+    <>
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col gap-3">
+        {isOpen && (
+          <div className="bg-card border rounded-lg shadow-lg p-4 mb-3 w-64 sm:w-72 max-w-[calc(100vw-2rem)]">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold">Liên hệ với chúng tôi</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => setIsOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="space-y-2">
+              <Button
+                asChild
+                className="w-full justify-start"
+                variant="outline"
+              >
+                <a
+                  href={getZaloChatUrl(settings.zaloNumber)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Chat Zalo
+                </a>
+              </Button>
+              <Button
+                asChild
+                className="w-full justify-start"
+                variant="outline"
+              >
+                <a
+                  href={settings.facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Chat Facebook
+                </a>
+              </Button>
+              <Button
+                asChild
+                className="w-full justify-start"
+                variant="default"
+              >
+                <a href={`tel:${settings.phoneNumber}`}>
+                  <Phone className="h-4 w-4 mr-2" />
+                  Gọi ngay: {settings.phoneNumber}
+                </a>
+              </Button>
+            </div>
+          </div>
+        )}
+        <Button
+          size="lg"
+          className="rounded-full h-14 w-14 sm:h-16 sm:w-16 shadow-xl hover:shadow-2xl transition-all hover:scale-110 text-white"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Liên hệ với chúng tôi"
         >
-          <Button
-            size="lg"
-            className="h-14 w-14 rounded-full bg-[#0068FF] hover:bg-[#0052CC] shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-            aria-label="Chat Zalo"
-          >
-            <span className="text-xl font-bold text-white">Z</span>
-          </Button>
-        </a>
-      </motion.div>
-
-      {/* Facebook Messenger Button */}
-      <motion.div
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
-      >
-        <a
-          href={FACEBOOK_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group"
-        >
-          <Button
-            size="lg"
-            className="h-14 w-14 rounded-full bg-[#0084FF] hover:bg-[#0066CC] shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-            aria-label="Facebook Messenger"
-          >
-            <MessageCircle className="h-7 w-7 text-white" />
-          </Button>
-        </a>
-      </motion.div>
-
-      {/* Phone Button */}
-      <motion.div
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
-      >
-        <a href={PHONE_NUMBER} className="group">
-          <Button
-            size="lg"
-            className="h-14 w-14 rounded-full bg-green-600 hover:bg-green-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-            aria-label="Gọi ngay"
-          >
-            <Phone className="h-7 w-7 text-white" />
-          </Button>
-        </a>
-      </motion.div>
-    </div>
+          <MessageCircle className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
+        </Button>
+      </div>
+    </>
   )
 }

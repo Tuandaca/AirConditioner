@@ -1,100 +1,71 @@
 import Link from 'next/link'
-import { Facebook, Phone, MapPin, Mail } from 'lucide-react'
+import { getSiteSettings, getZaloChatUrl } from '@/lib/settings'
 
-const FACEBOOK_URL = 'https://facebook.com/yourpage'
-const ZALO_URL = 'https://zalo.me/0912345678'
-const PHONE_NUMBER = 'tel:0912345678'
-const EMAIL = 'mailto:contact@example.com'
-
-export function Footer() {
+export async function Footer() {
+  const settings = await getSiteSettings()
   return (
-    <footer className="bg-gray-900 text-gray-300">
-      <div className="container px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          {/* Company Info */}
+    <footer className="border-t bg-muted/50">
+      <div className="container px-4 md:px-6 py-8 md:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           <div>
-            <h3 className="text-xl font-bold text-white mb-4">Máy lạnh Việt Nam</h3>
-            <p className="mb-4 leading-relaxed">
-              Chuyên cung cấp máy lạnh chính hãng, lắp đặt tận nơi với giá tốt nhất thị trường.
+            <h3 className="text-lg font-semibold mb-4">AC Store</h3>
+            <p className="text-sm text-muted-foreground">
+              Chuyên cung cấp điều hòa chính hãng với giá tốt nhất thị trường.
             </p>
-            <div className="flex gap-4">
-              <a
-                href={FACEBOOK_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
-                aria-label="Facebook"
-              >
-                <Facebook className="h-5 w-5 text-white" />
-              </a>
-              <a
-                href={ZALO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-[#0068FF] rounded-full flex items-center justify-center hover:bg-[#0052CC] transition-colors"
-                aria-label="Zalo"
-              >
-                <svg
-                  className="h-5 w-5 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 2C6.48 2 2 5.58 2 10c0 2.86 1.58 5.41 4 6.86V22l4-2.2c.67.09 1.35.14 2 .14 5.52 0 10-3.58 10-8s-4.48-8-10-8zm-2 12l-4-4 1.41-1.41L10 11.17l6.59-6.59L18 6l-8 8z" />
-                </svg>
-              </a>
-            </div>
           </div>
-
-          {/* Quick Links */}
+          
           <div>
-            <h3 className="text-xl font-bold text-white mb-4">Liên kết nhanh</h3>
-            <ul className="space-y-2">
+            <h4 className="font-semibold mb-4">Sản phẩm</h4>
+            <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/" className="hover:text-white transition-colors">
-                  Trang chủ
+                <Link href="/products?brand=Daikin" className="text-muted-foreground hover:text-primary">
+                  Daikin
                 </Link>
               </li>
               <li>
-                <Link href="/products" className="hover:text-white transition-colors">
-                  Sản phẩm
+                <Link href="/products?brand=Mitsubishi Electric" className="text-muted-foreground hover:text-primary">
+                  Mitsubishi Electric
                 </Link>
               </li>
               <li>
-                <Link href="/#benefits" className="hover:text-white transition-colors">
-                  Ưu điểm
+                <Link href="/products?brand=Panasonic" className="text-muted-foreground hover:text-primary">
+                  Panasonic
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Contact Info */}
           <div>
-            <h3 className="text-xl font-bold text-white mb-4">Liên hệ</h3>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-primary" />
-                <a href={PHONE_NUMBER} className="hover:text-white transition-colors">
-                  0912 345 678
+            <h4 className="font-semibold mb-4">Liên hệ</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>
+                <a href={`tel:${settings.phoneNumber}`} className="hover:text-primary">
+                  Hotline: {settings.phoneNumber}
                 </a>
               </li>
-              <li className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-primary" />
-                <a href={EMAIL} className="hover:text-white transition-colors">
-                  contact@example.com
+              <li>Giờ làm việc: 8:00 - 20:00</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-4">Theo dõi</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a href={settings.facebookUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
+                  Facebook
                 </a>
               </li>
-              <li className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-primary mt-1" />
-                <span>
-                  123 Đường ABC, Quận XYZ, TP.HCM
-                </span>
+              <li>
+                <a href={getZaloChatUrl(settings.zaloNumber)} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
+                  Zalo
+                </a>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 pt-8 text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} Máy lạnh Việt Nam. Tất cả quyền được bảo lưu.</p>
+        <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
+          <p>&copy; 2024 AC Store. All rights reserved.</p>
         </div>
       </div>
     </footer>
