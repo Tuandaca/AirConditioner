@@ -71,8 +71,8 @@ export default function ProductsPage() {
     fetch('/api/products/filters')
       .then((res) => res.json())
       .then((data) => {
-        if (data.brands) setBrands(data.brands)
-        if (data.horsepowers) setHorsepowers(data.horsepowers)
+        if (data.brands) setBrands(data.brands.filter((b: string) => b && b.trim() !== ''))
+        if (data.horsepowers) setHorsepowers(data.horsepowers.filter((hp: string) => hp && hp.trim() !== ''))
       })
       .catch((error) => console.error('Error fetching filters:', error))
   }, [])

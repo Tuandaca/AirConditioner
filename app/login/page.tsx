@@ -25,18 +25,25 @@ export default function LoginPage() {
                 email,
                 password,
                 redirect: false,
-                callbackUrl: '/admin',
             })
+
+            console.log('Login result:', result) // Debug log
 
             if (result?.error) {
                 setError('Email hoặc mật khẩu không đúng')
+                setLoading(false)
             } else if (result?.ok) {
-                router.push('/admin')
-                router.refresh()
+                // Wait a bit for session to be set
+                setTimeout(() => {
+                    window.location.href = '/admin'
+                }, 100)
+            } else {
+                setError('Đã xảy ra lỗi. Vui lòng thử lại.')
+                setLoading(false)
             }
         } catch (err) {
+            console.error('Login error:', err)
             setError('Đã xảy ra lỗi. Vui lòng thử lại.')
-        } finally {
             setLoading(false)
         }
     }
@@ -51,30 +58,36 @@ export default function LoginPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
                             <Input
                                 id="email"
+                                name="email"
                                 type="email"
                                 placeholder="admin@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                                autoComplete="off"
                                 required
+                                disabled={loading}
                             />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="password">Mật khẩu</Label>
                             <Input
                                 id="password"
+                                name="password"
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                autoComplete="off"
                                 required
+                                disabled={loading}
                             />
                         </div>
                         {error && (
-                            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+                            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md border border-destructive/20">
                                 {error}
                             </div>
                         )}

@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import type { Product as PrismaProduct } from '@prisma/client'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -37,8 +38,16 @@ const productSchema = z.object({
   horsepower: z.string(),
   inverter: z.boolean(),
   featured: z.boolean().optional().default(false),
-  status: z.enum(['active', 'inactive', 'out_of_stock']),
+  status: z.enum(['active', 'inactive', 'out_of_stock']).default('active'),
   description: z.string().optional(),
+  specifications: z.object({
+    warranty: z.string().optional(),
+    origin: z.string().optional(),
+    gas: z.string().optional(),
+    energySaving: z.string().optional(),
+    coolingCapacity: z.string().optional(),
+    coolingArea: z.string().optional(),
+  }).optional(),
 })
 
 type ProductFormValues = z.infer<typeof productSchema>
@@ -46,6 +55,18 @@ type ProductFormValues = z.infer<typeof productSchema>
 interface ProductFormProps {
   product?: PrismaProduct;
   onSubmit?: (data: ProductFormValues & { images: string[] }) => void;
+}
+
+/* ================= HELPERS ================= */
+
+function generateSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 }
 
 /* ================= COMPONENT ================= */
@@ -66,7 +87,6 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
 
   const [images, setImages] = useState<string[]>(product?.images || []);
   const [imageUrl, setImageUrl] = useState('');
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -84,12 +104,21 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
         featured: product.featured,
         status: product.status as 'active' | 'inactive' | 'out_of_stock',
         description: product.description || '',
+        specifications: product.specifications as any || {},
       });
       setImages(product.images || []);
-      // Clear selected files when product changes (e.g., switching from edit to new product)
-      setSelectedFiles([]);
     }
   }, [product, reset]);
+
+  // Auto-generate slug from name for new products
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name === 'name' && value.name && !product) {
+        setValue('slug', generateSlug(value.name))
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [watch, setValue, product])
 
   /* ================= IMAGE HANDLERS ================= */
 
@@ -103,20 +132,24 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
     setImages((prev) => prev.filter((_, i) => i !== index))
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      // Convert FileList to Array and update state
-      setSelectedFiles(Array.from(e.target.files));
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+
+    const files = Array.from(e.target.files);
+    const remainingSlots = 3 - images.length;
+
+    // Check if adding these files would exceed 3 images
+    if (files.length > remainingSlots) {
+      toast.warning(`Chỉ có thể tải tối đa 3 ảnh. Bạn còn ${remainingSlots} vị trí trống.`);
+      e.target.value = ''; // Reset input
+      return;
     }
-  };
 
-  const handleUploadImages = async () => {
-    if (selectedFiles.length === 0) return;
-
+    // Auto-upload immediately
     setIsUploading(true);
     const uploadedUrls: string[] = [];
 
-    for (const file of selectedFiles) {
+    for (const file of files) {
       const formData = new FormData();
       formData.append('file', file);
 
@@ -132,17 +165,17 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
         } else {
           const errorData = await response.json();
           console.error(`Failed to upload ${file.name}:`, errorData.message);
-          // Optionally, show an error message to the user
+          toast.error(`Lỗi tải ${file.name}: ${errorData.message}`);
         }
       } catch (error) {
         console.error(`Error uploading ${file.name}:`, error);
-        // Optionally, show an error message to the user
+        toast.error(`Lỗi tải ${file.name}`);
       }
     }
 
     setImages((prev) => [...prev, ...uploadedUrls]);
-    setSelectedFiles([]); // Clear selected files after upload
     setIsUploading(false);
+    e.target.value = ''; // Reset input for next upload
   };
 
   const defaultSubmitHandler = async (data: ProductFormValues) => {
@@ -151,7 +184,7 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
       const payload = {
         ...data,
         images,
-        specifications: {},
+        specifications: data.specifications || null,
         benefits: [],
       };
 
@@ -175,7 +208,7 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
       router.refresh();
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Có lỗi xảy ra khi lưu sản phẩm');
+      toast.error('Có lỗi xảy ra khi lưu sản phẩm');
     } finally {
       setIsSubmitting(false);
     }
@@ -329,6 +362,39 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
         </CardContent>
       </Card>
 
+      {/* ===== TECHNICAL SPECIFICATIONS ===== */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Thông số kỹ thuật</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          <div>
+            <Label>Bảo hành</Label>
+            <Input {...register('specifications.warranty')} placeholder="12 tháng" />
+          </div>
+          <div>
+            <Label>Xuất xứ</Label>
+            <Input {...register('specifications.origin')} placeholder="Malaysia" />
+          </div>
+          <div>
+            <Label>Gas sử dụng</Label>
+            <Input {...register('specifications.gas')} placeholder="R410A" />
+          </div>
+          <div>
+            <Label>Tiết kiệm điện</Label>
+            <Input {...register('specifications.energySaving')} placeholder="30%" />
+          </div>
+          <div>
+            <Label>Công suất làm lạnh</Label>
+            <Input {...register('specifications.coolingCapacity')} placeholder="18000 BTU" />
+          </div>
+          <div>
+            <Label>Diện tích làm lạnh</Label>
+            <Input {...register('specifications.coolingArea')} placeholder="30-45 m²" />
+          </div>
+        </CardContent>
+      </Card>
+
       {/* ===== IMAGES ===== */}
       <Card>
         <CardHeader>
@@ -336,23 +402,27 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="mb-4 space-y-2">
-            <Label htmlFor="image-upload">Tải ảnh lên từ thiết bị</Label>
-            <div className="flex gap-2">
-              <Input
-                id="image-upload"
-                type="file"
-                multiple
-                accept="image/jpeg,image/png,image/webp"
-                onChange={handleFileChange}
-                className="flex-grow"
-              />
-              <Button onClick={handleUploadImages} type="button" disabled={selectedFiles.length === 0 || isUploading}>
-                {isUploading ? 'Đang tải...' : 'Tải lên'}
-              </Button>
+            <Label htmlFor="image-upload">Tải ảnh lên từ thiết bị (Tối đa 3 ảnh)</Label>
+            <input
+              id="image-upload"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileChange}
+              disabled={images.length >= 3 || isUploading}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">
+                Đã tải: {images.length}/3 ảnh
+              </span>
+              {isUploading && (
+                <span className="text-primary">Đang tải lên...</span>
+              )}
+              {images.length >= 3 && (
+                <span className="text-destructive">Đã đạt giới hạn</span>
+              )}
             </div>
-            {selectedFiles.length > 0 && (
-              <div className="text-sm text-gray-500">Đã chọn {selectedFiles.length} file.</div>
-            )}
           </div>
 
           <div className="flex gap-2">
@@ -366,31 +436,19 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
             </Button>
           </div>
 
-          {(images.length > 0 || selectedFiles.length > 0) && (
+          {images.length > 0 && (
             <>
               <div className="border-t pt-4">
                 <Label className="block mb-2">
-                  Hình ảnh đã thêm ({images.length + selectedFiles.length})
+                  Hình ảnh đã thêm ({images.length})
                 </Label>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                  {/* Previews for selected but not yet uploaded files */}
-                  {selectedFiles.map((file, index) => (
-                    <div key={`selected-${index}`} className="relative group">
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt={`Selected image ${index + 1}`}
-                        className="w-full aspect-square object-cover rounded-md opacity-60"
-                      />
-                      <span className="absolute inset-0 flex items-center justify-center text-white text-sm bg-black bg-opacity-50">Đang chờ tải lên</span>
-                    </div>
-                  ))}
-
-                  {/* Existing and newly uploaded images */}
-                  {images.map((image, index) => (
+                  {/* Uploaded images */}
+                  {images.map((url, index) => (
                     <div key={index} className="relative group">
                       <img
-                        src={image}
+                        src={url}
                         alt={`Image ${index + 1}`}
                         className="w-full aspect-square object-cover rounded-md"
                       />

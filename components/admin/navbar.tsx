@@ -12,7 +12,6 @@ export function AdminNavbar() {
   const navItems = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/products', label: 'Sản phẩm', icon: Package },
-    { href: '/admin/products', label: 'Sản phẩm', icon: Package },
     { href: '/admin/banners', label: 'Banners', icon: ImageIcon },
     { href: '/admin/media', label: 'Media', icon: ImageIcon },
     { href: '/admin/settings', label: 'Cài đặt', icon: Settings },
@@ -36,8 +35,8 @@ export function AdminNavbar() {
                   key={item.href}
                   href={item.href}
                   className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${isActive
-                      ? 'bg-primary text-primary-foreground'
-                      : 'hover:bg-muted'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
                     }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -50,7 +49,7 @@ export function AdminNavbar() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => signOut({ callbackUrl: '/admin/login' })}
+          onClick={() => signOut({ callbackUrl: '/login' })}
         >
           <LogOut className="h-4 w-4 mr-2" />
           Đăng xuất

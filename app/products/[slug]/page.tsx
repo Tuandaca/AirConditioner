@@ -109,12 +109,23 @@ export default async function ProductDetailPage({
         <div className="mt-8 lg:mt-12 border-t pt-8 lg:pt-12">
           <h2 className="text-xl sm:text-2xl font-bold mb-4 md:mb-6">Thông số kỹ thuật</h2>
           <div className="grid sm:grid-cols-2 gap-3 md:gap-4">
-            {Object.entries(specifications).map(([key, value]) => (
-              <div key={key} className="flex justify-between py-3 border-b">
-                <span className="font-medium text-muted-foreground">{key}</span>
-                <span className="font-semibold">{value}</span>
-              </div>
-            ))}
+            {Object.entries(specifications).map(([key, value]) => {
+              const labels: Record<string, string> = {
+                warranty: 'Bảo hành',
+                origin: 'Xuất xứ',
+                gas: 'Gas sử dụng',
+                energySaving: 'Tiết kiệm điện',
+                coolingCapacity: 'Công suất làm lạnh',
+                coolingArea: 'Diện tích làm lạnh',
+              }
+
+              return (
+                <div key={key} className="flex justify-between py-3 border-b">
+                  <span className="font-medium text-muted-foreground">{labels[key] || key}</span>
+                  <span className="font-semibold">{value}</span>
+                </div>
+              )
+            })}
           </div>
         </div>
       )}

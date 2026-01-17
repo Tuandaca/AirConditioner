@@ -3,26 +3,17 @@ import { NextResponse } from 'next/server'
 
 export default withAuth(
   function middleware(req) {
-    // Allow access to login page
-    if (req.nextUrl.pathname.startsWith('/admin/login')) {
-      return NextResponse.next()
-    }
-    
     return NextResponse.next()
   },
   {
     callbacks: {
-      authorized: ({ token, req }) => {
-        // Allow login page without token
-        if (req.nextUrl.pathname.startsWith('/admin/login')) {
-          return true
-        }
-        // Require token for other admin routes
+      authorized: ({ token }) => {
+        // Require token for admin routes
         return !!token
       },
     },
     pages: {
-      signIn: '/admin/login',
+      signIn: '/login',
     },
   }
 )

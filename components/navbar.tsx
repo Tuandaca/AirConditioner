@@ -39,6 +39,11 @@ export function Navbar() {
           <Link href="/products" className="text-base font-medium transition-colors hover:text-primary">
             Sản phẩm
           </Link>
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/login">
+              Quản trị
+            </Link>
+          </Button>
         </div>
 
         <div className="flex items-center space-x-4">
