@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
+import type { Product as PrismaProduct } from '@prisma/client'
+import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -41,20 +43,15 @@ const productSchema = z.object({
 
 type ProductFormValues = z.infer<typeof productSchema>
 
-interface Product extends ProductFormValues {
-  id: string; // Assuming product has an ID
-  images: string[];
-  featured?: boolean; // Add featured to the Product interface
-}
-
 interface ProductFormProps {
-  product?: Product; // Changed from defaultValues
-  onSubmit: (data: ProductFormValues & { images: string[] }) => void;
+  product?: PrismaProduct;
+  onSubmit?: (data: ProductFormValues & { images: string[] }) => void;
 }
 
 /* ================= COMPONENT ================= */
 
 export function ProductForm({ product, onSubmit }: ProductFormProps) {
+  const router = useRouter()
   const {
     register,
     handleSubmit,
@@ -71,6 +68,7 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
   const [imageUrl, setImageUrl] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Effect to reset form with product data when product prop changes
   useEffect(() => {
@@ -79,13 +77,13 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
         name: product.name,
         slug: product.slug,
         price: product.price,
-        originalPrice: product.originalPrice,
+        originalPrice: product.originalPrice ?? undefined,
         brand: product.brand,
         horsepower: product.horsepower,
         inverter: product.inverter,
-        featured: product.featured, // Set featured value
-        status: product.status,
-        description: product.description || '', // Ensure description is string
+        featured: product.featured,
+        status: product.status as 'active' | 'inactive' | 'out_of_stock',
+        description: product.description || '',
       });
       setImages(product.images || []);
       // Clear selected files when product changes (e.g., switching from edit to new product)
@@ -147,11 +145,51 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
     setIsUploading(false);
   };
 
+  const defaultSubmitHandler = async (data: ProductFormValues) => {
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        ...data,
+        images,
+        specifications: {},
+        benefits: [],
+      };
+
+      const url = product
+        ? `/api/admin/products/${product.id}`
+        : '/api/admin/products';
+
+      const method = product ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save product');
+      }
+
+      router.push('/admin/products');
+      router.refresh();
+    } catch (error) {
+      console.error('Error saving product:', error);
+      alert('Có lỗi xảy ra khi lưu sản phẩm');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const submitHandler = (data: ProductFormValues) => {
-    onSubmit({
-      ...data,
-      images,
-    })
+    if (onSubmit) {
+      onSubmit({
+        ...data,
+        images,
+      });
+    } else {
+      defaultSubmitHandler(data);
+    }
   }
 
   /* ================= RENDER ================= */
@@ -376,8 +414,8 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
 
       {/* ===== SUBMIT ===== */}
       <div className="flex justify-end">
-        <Button type="submit" size="lg">
-          Lưu sản phẩm
+        <Button type="submit" size="lg" disabled={isSubmitting || isUploading}>
+          {isSubmitting ? 'Đang lưu...' : 'Lưu sản phẩm'}
         </Button>
       </div>
     </form>

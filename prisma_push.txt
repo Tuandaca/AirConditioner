@@ -1,0 +1,22 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "postgres", schema "public" at "db.qlvafdvzixyetedttypu.supabase.co:5432"
+
+⚠️  There might be data loss when applying the changes:
+
+  • The `status` column on the `Product` table would be dropped and recreated. This will lead to data loss.
+
+
+Error: Use the --accept-data-loss flag to ignore the data loss warnings like prisma db push --accept-data-loss
+npm notice
+npm notice New major version of npm available! 10.9.2 -> 11.7.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.7.0
+npm notice To update run: npm install -g npm@11.7.0
+npm notice
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Error: 
+EPERM: operation not permitted, rename 'D:\Works\AirConditioner\node_modules\.prisma\client\query_engine-windows.dll.node.tmp21124' -> 'D:\Works\AirConditioner\node_modules\.prisma\client\query_engine-windows.dll.node'
+
+
+DONE 

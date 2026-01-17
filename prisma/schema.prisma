@@ -20,23 +20,29 @@ model User {
   updatedAt     DateTime  @updatedAt
 }
 
+enum ProductStatus {
+  active
+  inactive
+  out_of_stock
+}
+
 model Product {
-  id            String    @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String
-  slug          String    @unique
-  description   String    @db.Text
+  slug          String        @unique
+  description   String        @db.Text
   price         Float
   originalPrice Float?
   brand         String
-  horsepower    String    // e.g., "1HP", "1.5HP", "2HP"
-  inverter      Boolean   @default(false)
-  status        String    @default("active") // active, inactive, out_of_stock
-  images        String[]  // Array of image URLs
-  specifications Json?    // Key-value pairs for technical specs
-  benefits      String[]  // Array of benefit strings
-  featured      Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  horsepower    String        // e.g., "1HP", "1.5HP", "2HP"
+  inverter      Boolean       @default(false)
+  status        ProductStatus @default(active)
+  images        String[]      // Array of image URLs
+  specifications Json?        // Key-value pairs for technical specs
+  benefits      String[]      // Array of benefit strings
+  featured      Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   @@index([brand])
   @@index([status])

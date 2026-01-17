@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, ProductStatus } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -57,7 +57,7 @@ async function main() {
       brand: 'Daikin',
       horsepower: '1HP',
       inverter: true,
-      status: 'active',
+      status: ProductStatus.active,
       images: [
         'https://images.unsplash.com/photo-1631543915447-0b8b8b8b8b8b?w=800',
         'https://images.unsplash.com/photo-1631543915448-0b8b8b8b8b8b?w=800',
@@ -88,7 +88,7 @@ async function main() {
       brand: 'Mitsubishi Electric',
       horsepower: '1.5HP',
       inverter: true,
-      status: 'active',
+      status: ProductStatus.active,
       images: [
         'https://images.unsplash.com/photo-1631543915449-0b8b8b8b8b8b?w=800',
       ],
@@ -117,7 +117,7 @@ async function main() {
       brand: 'Panasonic',
       horsepower: '2HP',
       inverter: true,
-      status: 'active',
+      status: ProductStatus.active,
       images: [
         'https://images.unsplash.com/photo-1631543915450-0b8b8b8b8b8b?w=800',
       ],
