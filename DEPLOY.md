@@ -34,9 +34,22 @@ git push origin main
 2. Create a Postgres database
 3. Copy the connection string to `DATABASE_URL`
 
-**Option B: External Database (Supabase, Neon, etc.)**
-1. Create database in your provider
-2. Copy connection string to `DATABASE_URL`
+**Option B: Supabase (Recommended)**
+1. Create database at [supabase.com](https://supabase.com)
+2. Go to **Settings** → **Database**
+3. Scroll to **Connection string**
+4. Select **Connection pooling** tab (IMPORTANT!)
+5. Mode: **Transaction**
+6. Copy the connection string
+7. Replace `[YOUR-PASSWORD]` with your actual password
+8. Add to Vercel environment variables as `DATABASE_URL`
+
+**Example Supabase Pooling URL:**
+```
+postgresql://postgres.xxx:password@aws-1-region.pooler.supabase.com:6543/postgres
+```
+
+⚠️ **Important:** Use **Connection Pooling** (port 6543), NOT direct connection (port 5432) for Vercel!
 
 ### Step 4: Run Migrations
 
@@ -54,8 +67,8 @@ Or use Vercel's deployment hooks to run migrations automatically.
 
 ### Required
 ```env
-DATABASE_URL=postgresql://...
-NEXTAUTH_URL=https://yourdomain.com
+DATABASE_URL=postgresql://postgres.xxx:password@aws-1-region.pooler.supabase.com:6543/postgres
+NEXTAUTH_URL=https://yourdomain.vercel.app
 NEXTAUTH_SECRET=your-secret-here
 ```
 
