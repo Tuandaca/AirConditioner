@@ -46,10 +46,12 @@ git push origin main
 
 **Example Supabase Pooling URL:**
 ```
-postgresql://postgres.xxx:password@aws-1-region.pooler.supabase.com:6543/postgres
+postgresql://postgres.xxx:password@aws-1-region.pooler.supabase.com:6543/postgres?pgbouncer=true
 ```
 
-⚠️ **Important:** Use **Connection Pooling** (port 6543), NOT direct connection (port 5432) for Vercel!
+⚠️ **Important:** 
+- Use **Connection Pooling** (port 6543), NOT direct connection (port 5432)
+- Add `?pgbouncer=true` to prevent "prepared statement" errors
 
 ### Step 4: Run Migrations
 
@@ -67,7 +69,7 @@ Or use Vercel's deployment hooks to run migrations automatically.
 
 ### Required
 ```env
-DATABASE_URL=postgresql://postgres.xxx:password@aws-1-region.pooler.supabase.com:6543/postgres
+DATABASE_URL=postgresql://postgres.xxx:password@aws-1-region.pooler.supabase.com:6543/postgres?pgbouncer=true
 NEXTAUTH_URL=https://yourdomain.vercel.app
 NEXTAUTH_SECRET=your-secret-here
 ```
