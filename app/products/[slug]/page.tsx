@@ -10,6 +10,8 @@ import { getSiteSettings } from '@/lib/settings'
 import { Breadcrumbs } from '@/components/breadcrumbs'
 import { ProductImageGallery } from '@/components/product-image-gallery'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ProductDetailPage({
   params,
 }: {
