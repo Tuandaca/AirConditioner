@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select'
 import { Search } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { Breadcrumbs } from '@/components/breadcrumbs'
 
 interface Product {
   id: string
@@ -108,6 +109,7 @@ export default function ProductsPage() {
 
   return (
     <div className="container py-8">
+      <Breadcrumbs />
       <div className="mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">Tất cả sản phẩm</h1>
         <p className="text-muted-foreground">

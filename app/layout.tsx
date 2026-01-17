@@ -4,6 +4,9 @@ import './globals.css'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { FloatingChat } from '@/components/floating-chat'
+import { ThemeProvider } from '@/components/theme-provider'
+import { CompareProvider } from '@/lib/compare-context'
+import { CompareBar } from '@/components/compare-bar'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -18,12 +21,22 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="vi">
+    <html lang="vi" suppressHydrationWarning>
       <body className={inter.className}>
-        <Navbar />
-        <main className="min-h-screen">{children}</main>
-        <Footer />
-        <FloatingChat />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <CompareProvider>
+            <Navbar />
+            <main className="min-h-screen">{children}</main>
+            <Footer />
+            <CompareBar />
+            <FloatingChat />
+          </CompareProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

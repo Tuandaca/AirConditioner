@@ -7,6 +7,8 @@ import { formatPrice } from '@/lib/utils'
 import { Phone, ShoppingBag, Check } from 'lucide-react'
 import Link from 'next/link'
 import { getSiteSettings } from '@/lib/settings'
+import { Breadcrumbs } from '@/components/breadcrumbs'
+import { ProductImageGallery } from '@/components/product-image-gallery'
 
 export default async function ProductDetailPage({
   params,
@@ -28,35 +30,16 @@ export default async function ProductDetailPage({
 
   return (
     <div className="container py-4 md:py-8 px-4 md:px-6">
+      <Breadcrumbs items={[
+        { label: 'Sản phẩm', href: '/products' },
+        { label: product.brand, href: `/products?brand=${product.brand}` },
+        { label: product.name }
+      ]} />
       <div className="grid lg:grid-cols-2 gap-6 lg:gap-12">
         {/* Image Gallery */}
+        {/* Image Gallery */}
         <div>
-          <div className="aspect-square relative rounded-lg overflow-hidden mb-4">
-            <Image
-              src={product.images[0] || '/placeholder.jpg'}
-              alt={product.name}
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
-          {product.images.length > 1 && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
-              {product.images.slice(1, 5).map((image, index) => (
-                <div
-                  key={index}
-                  className="aspect-square relative rounded-lg overflow-hidden"
-                >
-                  <Image
-                    src={image}
-                    alt={`${product.name} ${index + 2}`}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
+          <ProductImageGallery images={product.images} productName={product.name} />
         </div>
 
         {/* Product Info */}

@@ -61,3 +61,14 @@ model SiteSettings {
 
   @@map("site_settings")
 }
+
+model Banner {
+  id          String   @id @default(cuid())
+  title       String? // Optional title
+  imageUrl    String // URL of the banner image
+  link        String? // Optional link when clicked
+  active      Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

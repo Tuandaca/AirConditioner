@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
         ? parseFloat(searchParams.get('maxPrice')!)
         : undefined,
       search: searchParams.get('search') || undefined,
+      ids: searchParams.get('ids')?.split(',') || undefined,
     }
 
     const products = await getProducts(filters)

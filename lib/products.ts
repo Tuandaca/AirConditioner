@@ -8,6 +8,7 @@ export async function getProducts(filters?: {
   minPrice?: number
   maxPrice?: number
   search?: string
+  ids?: string[]
 }) {
   const where: any = {
     status: 'active',
@@ -33,6 +34,10 @@ export async function getProducts(filters?: {
     if (filters.maxPrice) {
       where.price.lte = filters.maxPrice
     }
+  }
+
+  if (filters?.ids && filters.ids.length > 0) {
+    where.id = { in: filters.ids }
   }
 
   if (filters?.search) {
@@ -70,7 +75,7 @@ export async function createProduct(data: {
   featured?: boolean
 }) {
   const slug = slugify(data.name)
-  
+
   return prisma.product.create({
     data: {
       ...data,
@@ -98,7 +103,7 @@ export async function updateProduct(
   }
 ) {
   const updateData: any = { ...data }
-  
+
   if (data.name) {
     updateData.slug = slugify(data.name)
   }
