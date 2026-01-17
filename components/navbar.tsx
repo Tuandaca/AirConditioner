@@ -1,11 +1,29 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Phone } from 'lucide-react'
-import { getSiteSettings } from '@/lib/settings'
 import { ModeToggle } from '@/components/mode-toggle'
+import { CONTACT_INFO } from '@/lib/constants'
 
-export async function Navbar() {
-  const settings = await getSiteSettings()
+export function Navbar() {
+  const [phoneNumber, setPhoneNumber] = useState(CONTACT_INFO.phone)
+
+  useEffect(() => {
+    // Fetch settings from API
+    fetch('/api/settings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.phoneNumber) {
+          setPhoneNumber(data.phoneNumber)
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching settings:', error)
+        // Keep default value on error
+      })
+  }, [])
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -25,9 +43,9 @@ export async function Navbar() {
 
         <div className="flex items-center space-x-4">
           <Button asChild variant="outline" size="sm">
-            <a href={`tel:${settings.phoneNumber}`} className="flex items-center gap-2">
+            <a href={`tel:${phoneNumber}`} className="flex items-center gap-2">
               <Phone className="h-4 w-4" />
-              <span className="hidden sm:inline text-sm">{settings.phoneNumber}</span>
+              <span className="hidden sm:inline text-sm">{phoneNumber}</span>
             </a>
           </Button>
           <ModeToggle />

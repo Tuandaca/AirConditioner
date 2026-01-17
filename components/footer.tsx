@@ -1,8 +1,32 @@
-import Link from 'next/link'
-import { getSiteSettings, getZaloChatUrl } from '@/lib/settings'
+'use client'
 
-export async function Footer() {
-  const settings = await getSiteSettings()
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { getZaloChatUrl } from '@/lib/settings'
+import { CONTACT_INFO } from '@/lib/constants'
+
+export function Footer() {
+  const [settings, setSettings] = useState({
+    phoneNumber: CONTACT_INFO.phone,
+    zaloNumber: CONTACT_INFO.zalo,
+    facebookUrl: CONTACT_INFO.facebook,
+  })
+
+  useEffect(() => {
+    // Fetch settings from API
+    fetch('/api/settings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) {
+          setSettings(data)
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching settings:', error)
+        // Keep default values on error
+      })
+  }, [])
+
   return (
     <footer className="border-t bg-muted/50">
       <div className="container px-4 md:px-6 py-8 md:py-12">
@@ -13,7 +37,7 @@ export async function Footer() {
               Chuyên cung cấp điều hòa chính hãng với giá tốt nhất thị trường.
             </p>
           </div>
-          
+
           <div>
             <h4 className="font-semibold mb-4">Sản phẩm</h4>
             <ul className="space-y-2 text-sm">
