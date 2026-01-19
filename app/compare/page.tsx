@@ -139,13 +139,17 @@ export default function ComparePage() {
                                         <Trash2 className="h-4 w-4" />
                                     </button>
                                     <Link href={`/products/${product.slug}`} className="block">
-                                        <div className="aspect-square relative rounded-lg overflow-hidden mb-4 border bg-background">
-                                            <Image
-                                                src={product.images[0] || '/placeholder.jpg'}
-                                                alt={product.name}
-                                                fill
-                                                className="object-contain p-2"
-                                            />
+                                        <div className="aspect-square relative rounded-lg overflow-hidden mb-4 border bg-muted flex items-center justify-center">
+                                            {product.images && product.images.length > 0 ? (
+                                                <Image
+                                                    src={product.images[0]}
+                                                    alt={product.name}
+                                                    fill
+                                                    className="object-contain p-2"
+                                                />
+                                            ) : (
+                                                <p className="text-sm text-muted-foreground">Chưa cập nhật ảnh</p>
+                                            )}
                                         </div>
                                         <h3 className="font-semibold text-base line-clamp-2 hover:text-primary mb-2">
                                             {product.name}

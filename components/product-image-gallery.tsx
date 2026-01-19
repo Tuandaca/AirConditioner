@@ -17,13 +17,8 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
 
     if (!images || images.length === 0) {
         return (
-            <div className="aspect-square relative rounded-lg overflow-hidden bg-muted">
-                <Image
-                    src="/placeholder.jpg"
-                    alt={productName}
-                    fill
-                    className="object-cover"
-                />
+            <div className="aspect-square relative rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+                <p className="text-sm text-muted-foreground">Chưa cập nhật ảnh</p>
             </div>
         )
     }

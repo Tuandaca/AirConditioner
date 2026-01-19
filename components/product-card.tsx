@@ -57,12 +57,21 @@ export function ProductCard({
   return (
     <div className="group relative bg-card border rounded-lg overflow-hidden flex flex-col hover:shadow-lg transition-shadow">
       <Link href={`/products/${slug}`} className="aspect-square relative block overflow-hidden">
-        <Image
-          src={images[0] || '/placeholder.jpg'}
-          alt={name}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
-        />
+        <div className="relative aspect-square overflow-hidden rounded-t-lg bg-muted">
+          {images && images.length > 0 ? (
+            <Image
+              src={images[0]}
+              alt={name}
+              fill
+              className="object-cover transition-transform hover:scale-105"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center bg-muted">
+              <p className="text-sm text-muted-foreground">Chưa cập nhật ảnh</p>
+            </div>
+          )}
+        </div>
         {discount > 0 && (
           <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded">
             -{discount}%
