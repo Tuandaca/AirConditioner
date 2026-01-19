@@ -56,7 +56,7 @@ export async function Hero() {
           <div className="hidden md:block">
             <div className="relative">
               {banner?.imageUrl ? (
-                <div className="aspect-square relative rounded-lg overflow-hidden shadow-2xl">
+                <div className="aspect-[4/3] relative rounded-lg overflow-hidden shadow-2xl">
                   <Image
                     src={banner.imageUrl}
                     alt={banner.title || "Banner"}
@@ -66,7 +66,7 @@ export async function Hero() {
                   />
                 </div>
               ) : (
-                <div className="aspect-square rounded-lg bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center">
+                <div className="aspect-[4/3] rounded-lg bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center">
                   <ShoppingBag className="h-48 w-48 text-primary/20" />
                 </div>
               )}

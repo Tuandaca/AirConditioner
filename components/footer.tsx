@@ -32,7 +32,7 @@ export function Footer() {
       <div className="container px-4 md:px-6 py-8 md:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4">AC Store</h3>
+            <h3 className="text-lg font-semibold mb-4">Vỹ - Máy lạnh nội địa</h3>
             <p className="text-sm text-muted-foreground">
               Chuyên cung cấp điều hòa chính hãng với giá tốt nhất thị trường.
             </p>
@@ -89,7 +89,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>&copy; 2024 AC Store. All rights reserved.</p>
+          <p>&copy; 2026 Vỹ - Máy lạnh nội địa. All rights reserved.</p>
         </div>
       </div>
     </footer>

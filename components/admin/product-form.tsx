@@ -215,6 +215,10 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
   };
 
   const submitHandler = (data: ProductFormValues) => {
+    console.log('Form submitted with data:', data);
+    console.log('Images:', images);
+    console.log('Form errors:', errors);
+
     if (onSubmit) {
       onSubmit({
         ...data,
@@ -276,45 +280,64 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div>
             <Label>Hãng</Label>
-            <Input {...register('brand')} />
+            <Input {...register('brand')} list="brands-list" placeholder="Chọn hoặc nhập hãng" />
+            <datalist id="brands-list">
+              <option value="Daikin" />
+              <option value="Mitsubishi" />
+              <option value="Panasonic" />
+              <option value="LG" />
+              <option value="Samsung" />
+              <option value="Toshiba" />
+              <option value="Carrier" />
+              <option value="Midea" />
+            </datalist>
           </div>
 
           <div>
             <Label>Công suất</Label>
             <Select
-              value={watch('horsepower') || '1HP'} // Use watch and provide fallback
-              onValueChange={(value) => setValue('horsepower', value)}
+              value={watch('horsepower') || '1HP'}
+              onValueChange={(value) => {
+                setValue('horsepower', value, { shouldValidate: true });
+              }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Chọn công suất">
-                  {watch('horsepower') || 'Chọn công suất'}
-                </SelectValue>
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="1HP">1 HP</SelectItem>
                 <SelectItem value="1.5HP">1.5 HP</SelectItem>
                 <SelectItem value="2HP">2 HP</SelectItem>
                 <SelectItem value="2.5HP">2.5 HP</SelectItem>
+                <SelectItem value="3HP">3 HP</SelectItem>
+                <SelectItem value="4HP">4 HP</SelectItem>
+                <SelectItem value="5HP">5 HP</SelectItem>
               </SelectContent>
             </Select>
+            {errors.horsepower && (
+              <p className="text-sm text-red-500">{errors.horsepower.message}</p>
+            )}
           </div>
 
           <div>
             <Label>Inverter</Label>
             <Select
-              value={watch('inverter')?.toString() ?? 'false'} // Use watch and provide fallback
-              onValueChange={(value) =>
-                setValue('inverter', value === 'true')
-              }
+              value={watch('inverter')?.toString() ?? 'false'}
+              onValueChange={(value) => {
+                setValue('inverter', value === 'true', { shouldValidate: true });
+              }}
             >
               <SelectTrigger>
-                <SelectValue>{watch('inverter')?.toString() === 'true' ? 'Có' : 'Không'}</SelectValue>
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="true">Có</SelectItem>
                 <SelectItem value="false">Không</SelectItem>
               </SelectContent>
             </Select>
+            {errors.inverter && (
+              <p className="text-sm text-red-500">{errors.inverter.message}</p>
+            )}
           </div>
 
           <div>
@@ -329,9 +352,7 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
               }
             >
               <SelectTrigger>
-                <SelectValue>
-                  {watch('status') === 'active' ? 'Đang bán' : watch('status') === 'inactive' ? 'Ẩn' : 'Hết hàng'}
-                </SelectValue>
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="active">Đang bán</SelectItem>
@@ -370,27 +391,66 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div>
             <Label>Bảo hành</Label>
-            <Input {...register('specifications.warranty')} placeholder="12 tháng" />
+            <Input {...register('specifications.warranty')} list="warranty-list" placeholder="12 tháng" />
+            <datalist id="warranty-list">
+              <option value="12 tháng" />
+              <option value="24 tháng" />
+              <option value="36 tháng" />
+              <option value="5 năm" />
+            </datalist>
           </div>
           <div>
             <Label>Xuất xứ</Label>
-            <Input {...register('specifications.origin')} placeholder="Malaysia" />
+            <Input {...register('specifications.origin')} list="origin-list" placeholder="Malaysia" />
+            <datalist id="origin-list">
+              <option value="Nhật Bản" />
+              <option value="Thái Lan" />
+              <option value="Malaysia" />
+              <option value="Trung Quốc" />
+              <option value="Hàn Quốc" />
+            </datalist>
           </div>
           <div>
             <Label>Gas sử dụng</Label>
-            <Input {...register('specifications.gas')} placeholder="R410A" />
+            <Input {...register('specifications.gas')} list="gas-list" placeholder="R410A" />
+            <datalist id="gas-list">
+              <option value="R410A" />
+              <option value="R32" />
+              <option value="R22" />
+            </datalist>
           </div>
           <div>
             <Label>Tiết kiệm điện</Label>
-            <Input {...register('specifications.energySaving')} placeholder="30%" />
+            <Input {...register('specifications.energySaving')} list="energy-list" placeholder="30%" />
+            <datalist id="energy-list">
+              <option value="20%" />
+              <option value="30%" />
+              <option value="40%" />
+              <option value="50%" />
+              <option value="60%" />
+            </datalist>
           </div>
           <div>
             <Label>Công suất làm lạnh</Label>
-            <Input {...register('specifications.coolingCapacity')} placeholder="18000 BTU" />
+            <Input {...register('specifications.coolingCapacity')} list="capacity-list" placeholder="18000 BTU" />
+            <datalist id="capacity-list">
+              <option value="9000 BTU" />
+              <option value="12000 BTU" />
+              <option value="18000 BTU" />
+              <option value="24000 BTU" />
+              <option value="30000 BTU" />
+            </datalist>
           </div>
           <div>
             <Label>Diện tích làm lạnh</Label>
-            <Input {...register('specifications.coolingArea')} placeholder="30-45 m²" />
+            <Input {...register('specifications.coolingArea')} list="area-list" placeholder="30-45 m²" />
+            <datalist id="area-list">
+              <option value="15-20 m²" />
+              <option value="20-30 m²" />
+              <option value="30-45 m²" />
+              <option value="45-60 m²" />
+              <option value="60-80 m²" />
+            </datalist>
           </div>
         </CardContent>
       </Card>
@@ -472,7 +532,16 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
 
       {/* ===== SUBMIT ===== */}
       <div className="flex justify-end">
-        <Button type="submit" size="lg" disabled={isSubmitting || isUploading}>
+        <Button
+          type="submit"
+          size="lg"
+          disabled={isSubmitting || isUploading}
+          onClick={() => {
+            console.log('Button clicked');
+            console.log('Current errors:', errors);
+            console.log('Form values:', watch());
+          }}
+        >
           {isSubmitting ? 'Đang lưu...' : 'Lưu sản phẩm'}
         </Button>
       </div>
